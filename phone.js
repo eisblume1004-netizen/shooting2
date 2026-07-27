@@ -113,9 +113,18 @@ async function startGyro() {
     }
     window.addEventListener("deviceorientation", handleOrientation);
     gyroActive = true;
-    startGyroButton.textContent = "ジャイロ有効";
-    startGyroButton.disabled = true;
-    statusText.textContent = connected ? "接続済み・ジャイロ有効" : "ジャイロ有効・接続中";
+
+startGyroButton.textContent = "ジャイロ有効";
+startGyroButton.disabled = true;
+
+/* Firebase接続済みならスタートボタンを使えるようにする */
+if (connected) {
+    readyButton.disabled = false;
+}
+
+statusText.textContent = connected
+    ? "接続済み・ジャイロ有効"
+    : "ジャイロ有効・接続中";
   } catch (error) {
     statusText.textContent = `ジャイロ起動エラー：${describeError(error)}`;
   }
@@ -168,24 +177,36 @@ async function sendShot() {
 }
 
 async function setReady() {
-  if (!connected || !firebase) return;
-  try {
-    await firebase.set(
-      firebase.ref(firebase.database, `rooms/${roomId}/ready`),
-      true
-    );
-  } catch (error) {
-    statusText.textContent = `スタート送信エラー：${describeError(error)}`;
-  }
-}
 
+    if (!gyroActive) {
+        statusText.textContent = "先にジャイロを有効にしてください";
+        return;
+    }
+
+    if (!connected || !firebase) return;
+
+    try {
+        await firebase.set(
+            firebase.ref(firebase.database, `rooms/${roomId}/ready`),
+            true
+        );
+    } catch (error) {
+        statusText.textContent =
+            `スタート送信エラー：${describeError(error)}`;
+    }
+}
 async function initializeFirebase() {
   try {
     firebase = await connectToFirebase();
     connected = true;
     fireButton.disabled = false;
-    readyButton.disabled = false;
-    statusText.textContent = "接続済み";
+
+    /* ジャイロを有効にするまではスタートできない */
+    readyButton.disabled = !gyroActive;
+
+    statusText.textContent = gyroActive
+      ? "接続済み・ジャイロ有効"
+      : "接続済み・先にジャイロを有効にしてください";
 
     const presenceRef = firebase.ref(
       firebase.database,
@@ -195,14 +216,19 @@ async function initializeFirebase() {
     await firebase.set(presenceRef, true);
 
     firebase.onValue(
-      firebase.ref(firebase.database, `rooms/${roomId}/ready`),
-      (snapshot) => {
-        const ready = snapshot.val() === true;
-        readyButton.disabled = ready;
-        readyButton.classList.toggle("ready", ready);
-        readyButton.textContent = ready ? "スタートOK！" : "スタート";
-      }
-    );
+  firebase.ref(firebase.database, `rooms/${roomId}/ready`),
+  (snapshot) => {
+    const ready = snapshot.val() === true;
+
+    /* READY済み、またはジャイロ未起動なら押せない */
+    readyButton.disabled = ready || !gyroActive;
+
+    readyButton.classList.toggle("ready", ready);
+    readyButton.textContent = ready
+      ? "スタートOK！"
+      : "スタート";
+  }
+);
 
     startAimSendLoop();
   } catch (error) {
