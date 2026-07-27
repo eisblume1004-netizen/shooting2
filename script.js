@@ -439,7 +439,8 @@ async function endGame() {
   playSound(sounds.clear, 0.72);
   removeAllBalloons();
 
-  resultOverlay.classList.add("show");
+  resultOverlay.classList.remove("show");
+　message.classList.remove("show");
   players.forEach((player) => {
 
     player.scoreBox.classList.add("finalScore");
@@ -449,7 +450,7 @@ async function endGame() {
     );
 
     if(textNode){
-        textNode.textContent = "最終スコア ";
+        textNode.textContent = "スコア ";
     }
 
 });
