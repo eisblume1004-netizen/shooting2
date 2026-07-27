@@ -231,13 +231,13 @@ function listenToPlayer(player) {
     }
   );
 }
-
 async function initializeFirebase() {
   try {
     firebase = await connectToFirebase();
     firebaseStatus.textContent = "Firebase接続完了";
-    players.forEach(listenToPlayer);
+
     await resetReadyFlags();
+    players.forEach(listenToPlayer);
   } catch (error) {
     firebaseStatus.textContent = `Firebase接続エラー：${describeError(error)}`;
     console.error(error);
