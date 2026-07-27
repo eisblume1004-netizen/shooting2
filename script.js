@@ -69,6 +69,7 @@ const players = [1, 2].map((number) => ({
   balloonArea: document.getElementById(`balloonArea${number}`),
   scope: document.getElementById(`scope${number}`),
   flash: document.getElementById(`shotFlash${number}`),
+  scoreBox: document.querySelector(`#player${number}Side .scoreBox`),
   scoreElement: document.getElementById(`score${number}`),
   qrElement: document.getElementById(`qrCode${number}`),
   codeElement: document.getElementById(`roomCode${number}`),
@@ -379,12 +380,23 @@ async function startGame() {
   extraBalloonAdded = false;
   resultOverlay.classList.remove("show");
   message.classList.remove("show");
-
   players.forEach((player) => {
+
     player.score = 0;
     player.scoreElement.textContent = "0";
-  });
-  remainingTime = GAME_TIME;
+
+    player.scoreBox.classList.remove("finalScore");
+
+    const textNode = Array.from(player.scoreBox.childNodes).find(
+        node => node.nodeType === Node.TEXT_NODE
+    );
+
+    if(textNode){
+        textNode.textContent = "スコア ";
+    }
+
+});
+    remainingTime = GAME_TIME;
   timeElement.textContent = String(remainingTime);
   timeElement.classList.remove("danger");
   removeAllBalloons();
@@ -428,13 +440,20 @@ async function endGame() {
   removeAllBalloons();
 
   resultOverlay.classList.add("show");
-  message.innerHTML =
-    `ゲームしゅうりょう！<br>` +
-    `PLAYER 1：${players[0].score} 点<br>` +
-    `PLAYER 2：${players[1].score} 点<br>` +
-    `<small>もう一度遊ぶときは、ふたりともスマホのスタートを押してね</small>`;
-  message.classList.add("show");
-  instruction.textContent = "もう一度遊ぶときは、ふたりともスタート！";
+  players.forEach((player) => {
+
+    player.scoreBox.classList.add("finalScore");
+
+    const textNode = Array.from(player.scoreBox.childNodes).find(
+        node => node.nodeType === Node.TEXT_NODE
+    );
+
+    if(textNode){
+        textNode.textContent = "最終スコア ";
+    }
+
+});
+    instruction.textContent = "もう一度遊ぶときは、ふたりともスタート！";
   await resetReadyFlags();
 }
 
