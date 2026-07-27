@@ -309,8 +309,8 @@ function findHitBalloon(player) {
     const rect = balloon.getBoundingClientRect();
     const centerX = rect.left + rect.width * 0.5;
     const centerY = rect.top + rect.height * 0.30;
-    const normalizedX = (player.screenX - centerX) / (rect.width * 0.27);
-    const normalizedY = (player.screenY - centerY) / (rect.height * 0.29);
+    const normalizedX = (player.screenX - centerX) / (rect.width * 0.38);
+    const normalizedY = (player.screenY - centerY) / (rect.height * 0.40);
     if (normalizedX * normalizedX + normalizedY * normalizedY <= 1) {
       return balloon;
     }
